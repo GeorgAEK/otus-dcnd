@@ -25,7 +25,7 @@
 	&emsp;{DCN} - номер ЦОД (DC Number). Принимает значение от 01 до 15;  
 	&emsp;{PODN} - номер пода (POD Number). Принимает значение от 01 до 16.
 
-А NET (Network Entity Title) будет использоваться шаблон:
+А NET (Network Entity Title) будет использоваться шаблон:  
 **49.DDPP.LLLL.LLLL.LLLL.00**  
 где  
 	&emsp;DD - соответствует {DCN} и принимает значение от 01 до 15;  
@@ -183,7 +183,7 @@ end
 ```
 
 
-#### 2. Проверка работы OSPF
+#### 2. Проверка работы ISIS
 
 Проверка таблицы маршрутизации (на примере lf3):
 ```
@@ -232,7 +232,7 @@ traceroute to 10.1.10.2 (10.1.10.2), 30 hops max, 60 byte packets
  2  10.1.10.2 (10.1.10.2)  19.378 ms  19.410 ms  19.649 ms
 ```
 
-Проверка ISISdatabase (на примере lf3):
+Проверка ISIS database (на примере lf3):
 ```
 dc1-pod1-lf3#show isis database detail
 
