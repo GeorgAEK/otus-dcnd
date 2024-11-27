@@ -25,7 +25,7 @@
 	&emsp;{DCN} - номер ЦОД (DC Number). Принимает значение от 01 до 15;  
 	&emsp;{PODN} - номер пода (POD Number). Принимает значение от 01 до 16.
 
-А NET (Network Entity Title) будет использоваться шаблон:  
+А для NET (Network Entity Title) будет использоваться шаблон:  
 **49.DDPP.LLLL.LLLL.LLLL.00**  
 где  
 	&emsp;DD - соответствует {DCN} и принимает значение от 01 до 15;  
