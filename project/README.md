@@ -553,45 +553,45 @@ configs/
 ```
 
 Сформированные файлы:  
-![[generated_lf1.txt]]
+![generated_lf1.txt](generated_lf1.txt)
 
-![[generated_lf2.txt]]
+![generated_lf2.txt](generated_lf2.txt)
 
-![[generated_lf3.txt]]
+![generated_lf3.txt](generated_lf3.txt)
 
-![[generated_lf4.txt]]
+![generated_lf4.txt](generated_lf4.txt)
 
-![[generated_lf5.txt]]
+![generated_lf5.txt](generated_lf5.txt)
 
-![[generated_lf6.txt]]
+![generated_lf6.txt](generated_lf6.txt)
 
-![[generated_lf_demo.txt]]
+![generated_lf_demo.txt](generated_lf_demo.txt)
 
-![[generated_sp1.txt]]
+![generated_sp1.txt](generated_sp1.txt)
 
-![[generated_sp2.txt]]
+![generated_sp2.txt](generated_sp2.txt)
 
 
 Далее эти файлы "заливаются" на соответствующие коммутаторы. В данной работе для этого использовалась команда:
 ```
 #configure replace terminal:
 ```
-Итоговые файлы конфигурации устройств после "заливки" вышеуказанных файлов:
-![[lf1.txt]]
+Итоговые файлы конфигурации устройств после "заливки" вышеуказанных файлов:  
+![lf1.txt](lf1.txt)
 
-![[lf2.txt]]
+![lf2.txt](lf2.txt)
 
-![[lf3.txt]]
+![lf3.txt](lf3.txt)
 
-![[lf4.txt]]
+![lf4.txt](lf4.txt)
 
-![[lf5.txt]]
+![lf5.txt](lf5.txt)
 
-![[lf6.txt]]
+![lf6.txt](lf6.txt)
 
-![[sp1.txt]]
+![sp1.txt](sp1.txt)
 
-![[sp2.txt]]
+![sp2.txt](sp2.txt)
 
 
 #### 4. Проверка работоспособности сетевой фабрики
