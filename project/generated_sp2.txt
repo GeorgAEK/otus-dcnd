@@ -1,0 +1,129 @@
+no aaa root
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+hostname dc1-pod1-sp2
+!
+spanning-tree mode mstp
+!
+interface Ethernet1
+   description lf1|Eth2
+   mtu 9214
+   no switchport
+   ip address 10.1.12.0/31
+!
+interface Ethernet2
+   description lf2|Eth2
+   mtu 9214
+   no switchport
+   ip address 10.1.12.2/31
+!
+interface Ethernet3
+   description lf3|Eth2
+   mtu 9214
+   no switchport
+   ip address 10.1.12.4/31
+!
+interface Ethernet4
+   description lf4|Eth2
+   mtu 9214
+   no switchport
+   ip address 10.1.12.6/31
+!
+interface Ethernet5
+   description lf5|Eth2
+   mtu 9214
+   no switchport
+   ip address 10.1.12.8/31
+!
+interface Ethernet6
+   description lf6|Eth2
+   mtu 9214
+   no switchport
+   ip address 10.1.12.10/31
+!
+interface Loopback0
+   description Overlay-routing-address
+   ip address 10.1.10.202/32
+!
+interface Management1
+!
+ip routing
+!
+ip prefix-list PL-DEFAULT
+   seq 10 permit 0.0.0.0/0
+!
+ip prefix-list PL-LOOPBACKS
+   seq 10 permit 10.1.10.0/24 eq 32
+   seq 20 permit 10.1.19.0/24 eq 32
+!
+route-map RM-BGP-LEAFS-IN permit 10
+   match ip address prefix-list PL-LOOPBACKS
+!
+route-map RM-BGP-LEAFS-OUT permit 10
+   match ip address prefix-list PL-LOOPBACKS
+!
+route-map RM-BGP-LEAFS-OUT permit 100
+   match ip address prefix-list PL-DEFAULT
+!
+route-map RM-REDISTRIBUTE-DIRECT permit 10
+   match ip address prefix-list PL-LOOPBACKS
+   match source-protocol connected
+!
+router bgp 65001.01202
+   router-id 10.1.10.202
+   maximum-paths 2
+   neighbor PGROUP-OVERLAY peer group
+   neighbor PGROUP-OVERLAY next-hop-unchanged
+   neighbor PGROUP-OVERLAY update-source Loopback0
+   neighbor PGROUP-OVERLAY ebgp-multihop 3
+   neighbor PGROUP-OVERLAY send-community extended
+   neighbor PGROUP-OVERLAY maximum-routes 16000
+   neighbor PGROUP-UNDERLAY peer group
+   neighbor PGROUP-UNDERLAY bfd
+   neighbor PGROUP-UNDERLAY route-map RM-BGP-LEAFS-IN in
+   neighbor PGROUP-UNDERLAY route-map RM-BGP-LEAFS-OUT out
+   neighbor 10.1.10.1 peer group PGROUP-OVERLAY
+   neighbor 10.1.10.1 remote-as 65001.01001
+   neighbor 10.1.10.1 description lf1-ovrl 65001.01001
+   neighbor 10.1.12.1 peer group PGROUP-UNDERLAY
+   neighbor 10.1.12.1 remote-as 65001.01001
+   neighbor 10.1.12.1 description lf1-undr 65001.01001
+   neighbor 10.1.10.2 peer group PGROUP-OVERLAY
+   neighbor 10.1.10.2 remote-as 65001.01002
+   neighbor 10.1.10.2 description lf2-ovrl 65001.01002
+   neighbor 10.1.12.3 peer group PGROUP-UNDERLAY
+   neighbor 10.1.12.3 remote-as 65001.01002
+   neighbor 10.1.12.3 description lf2-undr 65001.01002
+   neighbor 10.1.10.3 peer group PGROUP-OVERLAY
+   neighbor 10.1.10.3 remote-as 65001.01003
+   neighbor 10.1.10.3 description lf3-ovrl 65001.01003
+   neighbor 10.1.12.5 peer group PGROUP-UNDERLAY
+   neighbor 10.1.12.5 remote-as 65001.01003
+   neighbor 10.1.12.5 description lf3-undr 65001.01003
+   neighbor 10.1.10.4 peer group PGROUP-OVERLAY
+   neighbor 10.1.10.4 remote-as 65001.01004
+   neighbor 10.1.10.4 description lf4-ovrl 65001.01004
+   neighbor 10.1.12.7 peer group PGROUP-UNDERLAY
+   neighbor 10.1.12.7 remote-as 65001.01004
+   neighbor 10.1.12.7 description lf4-undr 65001.01004
+   neighbor 10.1.10.5 peer group PGROUP-OVERLAY
+   neighbor 10.1.10.5 remote-as 65001.01005
+   neighbor 10.1.10.5 description lf5-ovrl 65001.01005
+   neighbor 10.1.12.9 peer group PGROUP-UNDERLAY
+   neighbor 10.1.12.9 remote-as 65001.01005
+   neighbor 10.1.12.9 description lf5-undr 65001.01005
+   neighbor 10.1.10.6 peer group PGROUP-OVERLAY
+   neighbor 10.1.10.6 remote-as 65001.01006
+   neighbor 10.1.10.6 description lf6-ovrl 65001.01006
+   neighbor 10.1.12.11 peer group PGROUP-UNDERLAY
+   neighbor 10.1.12.11 remote-as 65001.01006
+   neighbor 10.1.12.11 description lf6-undr 65001.01006
+   redistribute connected route-map RM-REDISTRIBUTE-DIRECT
+   !
+   address-family evpn
+      neighbor PGROUP-OVERLAY activate
+!
+end

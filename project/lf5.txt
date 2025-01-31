@@ -1,0 +1,192 @@
+dc1-pod1-lf5#show run
+! Command: show running-config
+! device: dc1-pod1-lf5 (vEOS-lab, EOS-4.29.2F)
+!
+! boot system flash:/vEOS-lab.swi
+!
+no aaa root
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+hostname dc1-pod1-lf5
+!
+spanning-tree mode mstp
+!
+vlan 111
+   name VLAN-111
+!
+vlan 2000
+   name VLAN-2000
+!
+vlan 4000
+   name MLAG-PEER
+   trunk group TG-MLAG-PEER
+!
+vrf instance MGMT
+!
+vrf instance TENANT-1
+!
+vrf instance TENANT-2
+!
+interface Port-Channel5
+   description client|MLAG
+   switchport mode trunk
+   mlag 5
+!
+interface Port-Channel100
+   description MLAG-ICL
+   switchport mode trunk
+   switchport trunk group TG-MLAG-PEER
+   spanning-tree link-type point-to-point
+!
+interface Ethernet1
+   description sp1|Eth5
+   mtu 9214
+   no switchport
+   ip address 10.1.11.9/31
+!
+interface Ethernet2
+   description sp2|Eth5
+   mtu 9214
+   no switchport
+   ip address 10.1.12.9/31
+!
+interface Ethernet3
+!
+interface Ethernet4
+!
+interface Ethernet5
+   description client
+   channel-group 5 mode active
+!
+interface Ethernet6
+!
+interface Ethernet7
+   description lf6|Eth7
+   channel-group 100 mode active
+!
+interface Ethernet8
+   description lf6|Eth8
+   channel-group 100 mode active
+!
+interface Loopback0
+   description Overlay-routing-address
+   ip address 10.1.10.5/32
+!
+interface Loopback1
+   description VTEP-address
+   ip address 10.1.19.3/32
+!
+interface Management1
+   vrf MGMT
+   ip address 10.1.201.5/24
+!
+interface Vlan111
+   description SVI-111
+   vrf TENANT-1
+   ip address virtual 10.32.1.254/24
+!
+interface Vlan2000
+   description SVI-2000
+   vrf TENANT-2
+   ip address virtual 10.32.20.254/24
+!
+interface Vlan4000
+   description MLAG-PEER-P2P
+   no autostate
+   ip address 192.168.201.5/24
+!
+interface Vxlan1
+   vxlan source-interface Loopback1
+   vxlan udp-port 4789
+   vxlan vlan 111 vni 1010111
+   vxlan vlan 2000 vni 1012000
+   vxlan vrf TENANT-1 vni 1015001
+   vxlan vrf TENANT-2 vni 1015002
+   vxlan learn-restrict any
+!
+ip virtual-router mac-address cc:cc:ee:ee:ff:ff
+!
+ip routing
+ip routing vrf MGMT
+ip routing vrf TENANT-1
+ip routing vrf TENANT-2
+!
+ip prefix-list PL-LINKNETS seq 10 permit 10.1.11.0/24 eq 31
+ip prefix-list PL-LINKNETS seq 20 permit 10.1.12.0/24 eq 31
+ip prefix-list PL-LOOPBACKS seq 10 permit 10.1.10.0/24 eq 32
+ip prefix-list PL-LOOPBACKS seq 20 permit 10.1.19.0/24 eq 32
+!
+mlag configuration
+   domain-id LF5-6
+   local-interface Vlan4000
+   peer-address 192.168.201.6
+   peer-address heartbeat 10.1.201.6 vrf MGMT
+   peer-link Port-Channel100
+   dual-primary detection delay 10 action errdisable all-interfaces
+!
+route-map RM-BGP-SPINE-OUT permit 10
+   match ip address prefix-list PL-LOOPBACKS
+!
+route-map RM-BGP-SPINE-OUT permit 20
+   match ip address prefix-list PL-LINKNETS
+!
+route-map RM-REDISTRIBUTE-DIRECT permit 10
+   match ip address prefix-list PL-LOOPBACKS
+   match source-protocol connected
+!
+route-map RM-REDISTRIBUTE-DIRECT permit 20
+   match ip address prefix-list PL-LINKNETS
+   match source-protocol connected
+!
+router bgp 4259906541
+   router-id 10.1.10.5
+   maximum-paths 8
+   neighbor PGROUP-OVERLAY peer group
+   neighbor PGROUP-OVERLAY update-source Loopback0
+   neighbor PGROUP-OVERLAY ebgp-multihop 3
+   neighbor PGROUP-OVERLAY send-community extended
+   neighbor PGROUP-OVERLAY maximum-routes 16000
+   neighbor PGROUP-UNDERLAY peer group
+   neighbor PGROUP-UNDERLAY bfd
+   neighbor PGROUP-UNDERLAY route-map RM-BGP-SPINE-OUT out
+   neighbor 10.1.10.201 peer group PGROUP-OVERLAY
+   neighbor 10.1.10.201 remote-as 4259906737
+   neighbor 10.1.10.202 peer group PGROUP-OVERLAY
+   neighbor 10.1.10.202 remote-as 4259906738
+   neighbor 10.1.11.8 peer group PGROUP-UNDERLAY
+   neighbor 10.1.11.8 remote-as 4259906737
+   neighbor 10.1.11.8 description sp1 65001.01201
+   neighbor 10.1.12.8 peer group PGROUP-UNDERLAY
+   neighbor 10.1.12.8 remote-as 4259906738
+   neighbor 10.1.12.8 description sp2 65001.01202
+   redistribute connected route-map RM-REDISTRIBUTE-DIRECT
+   !
+   vlan 111
+      rd 10.1.10.5:111
+      route-target both 65001:1010111
+      redistribute learned
+   !
+   vlan 2000
+      rd 10.1.10.5:2000
+      route-target both 65001:1012000
+      redistribute learned
+   !
+   address-family evpn
+      neighbor PGROUP-OVERLAY activate
+   !
+   vrf TENANT-1
+      rd 10.1.10.5:5001
+      route-target import evpn 65001:1015001
+      route-target export evpn 65001:1015001
+      redistribute connected
+   !
+   vrf TENANT-2
+      rd 10.1.10.5:5002
+      route-target import evpn 65001:1015002
+      route-target export evpn 65001:1015002
+      redistribute connected
+!
+end
